@@ -154,16 +154,20 @@ abstract class AbstractConfigReader : MutableConfigReader {
     private fun resolvePath(path: String): String {
         var resolvePath: String
         if (path.startsWith("/") || path.startsWith("~") || path.indexOf(":") == 1) {
-            resolvePath = path
+            if (path.startsWith("~")) {
+                resolvePath = path.replaceFirst("~", System.getenv("HOME"))
+            } else {
+                resolvePath = path
+            }
         } else {
             val currPath = ActionUtils.findCurrentPath();
             if (currPath.isNullOrBlank()) return path
-            resolvePath = currPath!!.toString().substringBeforeLast(File.separator) + File.separator + path.removePrefix(".")
+            resolvePath = currPath.toString().substringBeforeLast(File.separator) + File.separator + path.removePrefix(".")
         }
         if (File.separator.equals("\\")) {
             return resolvePath.replace("/", File.separator)
         } else if(File.separator.equals("/")){
-            return resolvePath.replaceAfter("\\", File.separator)
+            return resolvePath.replace("\\", File.separator)
         }else{
             return resolvePath
         }
